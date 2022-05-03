@@ -22,7 +22,7 @@ class Face_Dataset(Dataset):
                 "val" means validation set
         """
         # inherit from base class
-        super(Dataset, self).__init__()
+        super(Face_Dataset, self).__init__()
         self.images = data["images"]
         self.labels = data["labels"]
         self.mode = mode  # val or train
