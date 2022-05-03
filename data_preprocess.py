@@ -4,7 +4,7 @@ import glob
 from sklearn.model_selection import train_test_split
 import os
 
-# assign class labelsas indices
+# assign indices to class names
 label_dict = {
     "Patty_Schnyder": 0,
     "Paul_Bremer": 1,
