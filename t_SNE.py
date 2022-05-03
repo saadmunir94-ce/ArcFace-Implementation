@@ -1,6 +1,7 @@
 from sklearn import manifold
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+# Formulate dictionary of class labels and indices
 label_dict = {
     "Patty_Schnyder": 0,
     "Paul_Bremer": 1,
@@ -21,10 +22,11 @@ label_dict = {
     "Raquel_Welch": 16,
     "Ray_Nagin": 17
 }
+# Reverse keys and values
 label_dict = {v: k for k, v in label_dict.items()}
 def computeTSNEProjectionOfLatentSpace(X_encoded, label, path_of_visualizations, epoch):
     """
-    Computes T-SNE non-linear manifold of the last weight layer
+    Computes 3-D T-SNE non-linear manifold of the last weight layer
     Args:
         X_encoded: torch.tensor
             Logits before activation function
