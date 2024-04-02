@@ -5,56 +5,62 @@ import numpy as np
 from torchvision import transforms
 from torch.utils.data import WeightedRandomSampler
 
-# Store mean and standard deviations for normalization
+# Store mean and standard deviations of LFW images aross the RGB channels for normalization
 mean = [0.485, 0.456, 0.406]
 std = [0.229, 0.224, 0.225]
 
 
 class Face_Dataset(Dataset):
+    """
+    Custom dataset class for face recognition tasks.
+    
+    Attributes:
+        images (numpy.ndarray): Array of images.
+        labels (numpy.ndarray): Array of corresponding labels.
+        mode (str): Mode of the dataset. "train" for training set and "val" for validation set.
+        val_transform (torchvision.transforms.Compose): Composed transformations for validation mode.
+        train_transform (torchvision.transforms.Compose): Composed transformations for training mode.
+        samples_weight (torch.Tensor): Weighted samples for weighted random sampler.
+    """
     def __init__(self, data, mode):
         """
-        Constructor of Face_Dataset
-        Args:
-            data: Python Dictionary
-                returns numpy arrays of images and labels with associated keys "images" and "labels"
-            mode: str
-                "train" means train set
-                "val" means validation set
+        Constructor for the Face_Dataset class.
+
+        Parameters:
+            data (dict): Dictionary containing images and labels.
+            mode (str): Mode of the dataset. "train" for training set and "val" for validation set.
         """
         # inherit from base class
         super(Face_Dataset, self).__init__()
         self.images = data["images"]
         self.labels = data["labels"]
-        self.mode = mode  # val or train
-        # Compose is the callable class which does chain of transformations on the data
-        # Consider creating two different transforms based on whether you are in the training or validation dataset.
+        self.mode = mode 
+        # Define transformations for validation and training modes
         self.val_transform = transforms.Compose([transforms.ToTensor(), transforms.Resize((224, 224)),
                                                  transforms.Normalize(mean=mean, std=std)])
 
         self.train_transform = transforms.Compose(
             [transforms.ToTensor(), transforms.Resize((224, 224)), transforms.RandomHorizontalFlip(),
              transforms.Normalize(mean=mean, std=std)])
-
     def __len__(self):
         """
+        Returns the size of the dataset
 
         Returns:
-            length of the dataset
+            int: size of the dataset.
         """
         return len(self.labels)
 
     def __getitem__(self, index):
         """
-        used for accessing list items
-        Args:
-            index: int
+        Retrieves the item at the given index.
+
+        Parameters:
+            index (int): Index of the item to retrieve.
 
         Returns:
-            img: torch.tensor
-                the corresponding image
-            label: torch.tensor
-                the corresponding class label
-
+            torch.Tensor: Image tensor.
+            torch.Tensor: Label tensor.
         """
         if self.mode == 'val':
             img = self.val_transform(self.images[index])
@@ -67,14 +73,13 @@ class Face_Dataset(Dataset):
 
     def create_sampler(self, with_replacement=True):
         """
-        Creates Weighted Random Sampler to overcome class imbalance
-        Args:
-            with_replacement: Boolean
-                Allow sampling with replacement
+        Creates Weighted Random Sampler to overcome class imbalance.
+
+        Parameters:
+            with_replacement (bool): Allow sampling with replacement.
 
         Returns:
-            sampler: torch.utils.data.WeightedRandomSampler
-
+            torch.utils.data.WeightedRandomSampler: Weighted sampler.
         """
         # get the class frequencies
         class_sample_count = np.array(
