@@ -28,20 +28,18 @@ label_dict = {
 # Reverse keys and values for the dictionary
 label_dict = {v: k for k, v in label_dict.items()}
 
-
 def get_data(id):
     """
-    Gets images and labels for category defined by index id
-    Args:
-        id: class index
+    Gets images and labels for category defined by index "id"
+    
+    Parameters:
+        id (int): class index
 
     Returns:
-        images: list
-            list of NumPy images
-        labels: list
-            list of labels [id, ..., id]
-        images.shape[0]: int
-            no of images for label id
+        tuple: A tuple containing:
+            - images (list): List of NumPy arrays representing images.
+            - labels (list): List of labels corresponding to the images.
+            - num_images (int): Number of images for the specified label.
     """
     person = label_dict[id]
     images = [imread(file) for file in glob.glob('./arcFace_dataset/' + person + '/*.jpg')]
@@ -49,21 +47,19 @@ def get_data(id):
     images = images.astype(np.float64)
     labels = np.full(shape=images.shape[0], fill_value=id)
     return images, labels, images.shape[0]
-
-
+    
 def get_count_dict(arr):
     """
     Returns Count of Unique categories in a Numpy Array as a Python Dictionary
-    Args:
-        arr: Numpy Array of class labels
-
+    
+    Parameters:
+        arr (numpy.ndarray): NumPy array of class labels.
     Returns:
-        Count of Unique categories in a Numpy Array as a Python Dictionary
+        dict: A dictionary where keys are unique categories and values are their counts.
     """
     unique, counts = np.unique(arr, return_counts=True)
     return dict(zip(unique, counts))
-
-
+    
 keys = list(label_dict.keys())
 sizes = []
 total_images, total_labels, size = get_data(0)
@@ -73,7 +69,7 @@ for key in keys[1:]:
     sizes.append(size)
     total_images = np.concatenate((total_images, images))
     total_labels = np.concatenate((total_labels, labels))
-
+    
 # Scale images to [0,1] range
 print("Before scaling, min: {}".format(np.min(total_images)))
 print("Before scaling, max: {}".format(np.max(total_images)))
@@ -83,7 +79,6 @@ print("After scaling, max: {}".format(np.max(total_images)))
 # Do the train test split
 X_train, X_test, y_train, y_test = train_test_split(total_images, total_labels, test_size=0.30, stratify=total_labels,
                                                     random_state=1234)
-print(get_count_dict(y_test))
 # Set the directories
 train_dir = "./train_data"
 test_dir = "./test_data"
