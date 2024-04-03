@@ -13,6 +13,7 @@ std = [0.229, 0.224, 0.225]
 class Face_Dataset(Dataset):
     """
     Custom dataset class for face recognition tasks.
+    In our case, it will be applied on the LFW dataset.
     
     Attributes:
         images (numpy.ndarray): Array of images.
@@ -44,7 +45,7 @@ class Face_Dataset(Dataset):
              transforms.Normalize(mean=mean, std=std)])
     def __len__(self):
         """
-        Returns the size of the dataset
+        Returns the size of the dataset.
 
         Returns:
             int: size of the dataset.
