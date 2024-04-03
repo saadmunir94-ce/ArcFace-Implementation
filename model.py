@@ -3,20 +3,26 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import Parameter
 
-
 class ArcFace(nn.Module):
+    """
+    ArcFace Layer for face recognition.
+    This layer is used for face recognition tasks. It computes the class logits using the ArcFace algorithm.
+
+    Attributes:
+        emb_size (int): The embedding size (the number of features extracted from CNN).
+        num_classes (int): The number of classes.
+        s (float): The radius of the projected hypersphere.
+        m (float): The arc margin in radians.
+    """
     def __init__(self, emb_size, num_classes, s=64.0, m=0.50):
         """
-        Constructor for ArcFace Layer
-        Args:
-            emb_size: int
-                the embedding size (the extracted no of features from CNN)
-            num_classes: int
-                the no of classes
-            s: float
-                the radius of the projected hypersphere
-            m: float
-                the arc margin in radians
+        Constructor for ArcFace Layer.
+
+        Parameters:
+            emb_size (int): The embedding size (the number of features extracted from CNN).
+            num_classes (int): The number of classes.
+            s (float): The radius of the projected hypersphere. Default is 64.0.
+            m (float): The arc margin in radians. Default is 0.50.
         """
         # inherit from base class
         super(ArcFace, self).__init__()
@@ -32,15 +38,14 @@ class ArcFace(nn.Module):
 
     def forward(self, embedding, gt):
         """
-        Computes the forward pass and returns the class logits
-        Args:
-            embedding: torch.tensor
-                extracted embeddings
-            gt: torch.tensor
-                groung truth labels
+        Computes the forward pass using the Arcface loss and returns the class logits.
 
-        Returns: the computed class logits through ArcFace Algorithm
+        Parameters:
+            embedding (torch.Tensor): Extracted embeddings.
+            gt (torch.Tensor): Ground truth labels.
 
+        Returns:
+            torch.Tensor: Computed class logits through ArcFace Algorithm.
         """
         fc7 = F.linear(F.normalize(embedding, dim=1), F.normalize(self.weights, dim=1), bias=None)
         # pick logit at class index
@@ -58,28 +63,38 @@ class ArcFace(nn.Module):
         # scaling
         fc7 *= self.s
         return fc7
-
+        
     def get_weights(self):
         """
-        Returns a deep copy of the weights which serve as class centroids
+        Returns a deep copy of the weights which serve as class centroids.
 
+        Returns:
+            torch.Tensor: Deep copy of the weights.
         """
         return self.weights.clone()
 
 
 class Model(nn.Module):
+    """
+    Model for face recognition.
+    This model is used for projecting an input face image into the target embedding size or the class logits depending
+    whether the softmax activation layer will be used or not respectively.
+    
+    Attributes:
+        ft_extractor (torch.nn.Sequential): Extracts meaningful features from the input image.
+        num_classes (int): Number of classes in the dataset.
+        is_softmax (bool): Indicates whether to use ArcFace Loss (False) or Softmax Loss (True).
+        emb_size (int): The target embedding size. Default is 512.
+    """
     def __init__(self, ft_extractor, num_classes, is_softmax, emb_size=512):
         """
-        Projecting an input face image into the target embedding size
-        Args:
-            ft_extractor: torch.nn.Sequential
-                Extracts meaningful features from the input image
-            num_classes: int
-                no of classes in the dataset
-            is_softmax: Boolean
-                "False" means use ArcFace Loss and "True" means use Softmax Loss
-            emb_size: int
-                the target embedding size. Default = 512
+        Constructor for Model.
+        
+        Parameters:
+            ft_extractor (torch.nn.Sequential): Extracts meaningful features from the input image.
+            num_classes (int): Number of classes in the dataset.
+            is_softmax (bool): Indicates whether to use Softmax Loss or not.
+            emb_size (int): The target embedding size. Default is 512.
         """
         # inherit from the base class
         super(Model, self).__init__()
@@ -97,13 +112,15 @@ class Model(nn.Module):
 
     def forward(self, input_tensor):
         """
-        Computes the forward pass and returns the extracted embeddings for an input face image
-        Args:
-            input_tensor: torch.tensor
-                torch tensor of input face
+        Computes the forward pass and performs either of the following:
+        1. Returns the extracted embeddings if no softmax activation layer is to be used.
+        2. Returns the class logits after applying the softmax if softmax activation layer is to be used.                                        
+        
+        Parameters:
+            input_tensor (torch.Tensor): Input tensor of input face.
 
-        Returns: the extracted embeddings of emb_size
-
+        Returns:
+            torch.Tensor: Extracted embeddings of emb_size.
         """
         features = torch.squeeze(self.ft_extractor(input_tensor))
         embedding = self.seq(features)
