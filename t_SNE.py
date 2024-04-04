@@ -1,6 +1,26 @@
+"""
+t_SNE Module
+
+This module contains functions for computing and visualizing the 3-D T-SNE non-linear manifold of the last weight layer in a model.
+
+Functions:
+    computeTSNEProjectionOfLatentSpace(X_encoded, label, path_of_visualizations, epoch):
+        Computes the 3-D T-SNE projection of the latent space.
+        
+        Args:
+            X_encoded (torch.tensor): Logits before activation function.
+            label (torch.tensor): Corresponding class labels.
+            path_of_visualizations (str): Directory to store plots into.
+            epoch (int): The epoch in consideration.
+        
+        Returns:
+            None
+"""
+# Imports
 from sklearn import manifold
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+
 # Formulate dictionary of class labels and indices
 label_dict = {
     "Patty_Schnyder": 0,
@@ -22,16 +42,19 @@ label_dict = {
     "Raquel_Welch": 16,
     "Ray_Nagin": 17
 }
+
 # Reverse keys and values
 label_dict = {v: k for k, v in label_dict.items()}
+
 def computeTSNEProjectionOfLatentSpace(X_encoded, label, path_of_visualizations, epoch):
     """
-    Computes 3-D T-SNE non-linear manifold of the last weight layer
-    Args:
+    Computes 3-D T-SNE non-linear manifold of the last weight layer.
+    
+    Parameters:
         X_encoded: torch.tensor
-            Logits before activation function
+            Class logits
         label: torch.tensor
-            Corresponding class labels
+            Corresponding ground truth class labels
         path_of_visualizations: str
             Directory to store plots into
         epoch: int
@@ -39,7 +62,6 @@ def computeTSNEProjectionOfLatentSpace(X_encoded, label, path_of_visualizations,
 
 
     Returns: None
-
     """
     model = manifold.TSNE(n_components=3, random_state=0, learning_rate=10, perplexity=20)
     tsne_data = model.fit_transform(X_encoded).T
